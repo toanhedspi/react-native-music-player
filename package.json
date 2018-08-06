@@ -9,7 +9,9 @@
   "dependencies": {
     "react": "16.4.1",
     "react-native": "0.56.0",
+    "react-native-blur": "^3.2.2",
     "react-native-elements": "^0.19.1",
+    "react-native-progress": "^3.5.0",
     "react-native-slider": "^0.11.0",
     "react-native-vector-icons": "^5.0.0"
   },
