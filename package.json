@@ -13,6 +13,7 @@
     "react-native-elements": "^0.19.1",
     "react-native-progress": "^3.5.0",
     "react-native-slider": "^0.11.0",
+    "react-native-sound": "^0.10.9",
     "react-native-vector-icons": "^5.0.0"
   },
   "devDependencies": {

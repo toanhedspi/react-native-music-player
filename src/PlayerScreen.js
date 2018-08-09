@@ -7,37 +7,69 @@
  */
 
 import React, { Component } from 'react';
-import { Animated, Easing, Platform, StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, Image } from 'react-native';
 import { Icon } from 'react-native-elements'
 import { BlurView } from 'react-native-blur';
-import { Bar } from 'react-native-progress';
+
+import Sound from 'react-native-sound';
+import Header from './Header';
+import AlbumArt from './AlbumArt';
+import Player from './Player';
 
 type Props = {};
 
-spinValue = new Animated.Value(0)
+const url = require('../Kataomoi.mp3');
 
-// First set up animation 
-Animated.loop(Animated.timing(
-    this.spinValue,
-    {
-        toValue: 1,
-        duration: 5000,
-        easing: Easing.linear
+function soundAction(state) {
+    // setTestState(testInfo, component, 'pending');
+
+    const callback = (error, sound) => {
+        if (error) {
+            Alert.alert('error', error.message);
+            // setTestState(testInfo, component, 'fail');
+            return;
+        }
+        //   setTestState(testInfo, component, 'playing');
+        // Run optional pre-play callback
+        //   testInfo.onPrepared && testInfo.onPrepared(sound, component);
+        // sound.play(() => {
+        //     // Success counts as getting to the end
+        //     // setTestState(testInfo, component, 'win');
+        //     // Release when it's done so we're not using up resources
+        //     sound.release();
+        // });
+    };
+
+    // If the audio is a 'require' then the second parameter must be the callback.
+    if (state === 'init') {
+        const sound = new Sound(url, error => callback(error, sound));
+        return sound;
     }
-)).start()
+    else if (state === 'play') {
+        sound.play(() => {
+                // Success counts as getting to the end
+                // setTestState(testInfo, component, 'win');
+                // Release when it's done so we're not using up resources
+                sound.release();
+            });
+    }
+    else if (state === 'pause') {
+        sound.pause();
+        console.log(sound.getDuration());
+    }
+    else if (state === 'duration') {
+        sound.getDuration();
+    }
+}
 
-// Second interpolate beginning and end values (in this case 0 and 1)
-const spin = this.spinValue.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['0deg', '360deg']
-})
+const sound = soundAction('init');
 
 export default class PlayerScreen extends Component<Props> {
 
     constructor(props) {
         super(props);
         this.state = { playButton: "play-circle-outline" };
-        this.onPressButton = this.onPressButton.bind(this);
+        // this.onPressButton = this.onPressButton.bind(this);
     }
 
     onPressButton = () => {
@@ -46,15 +78,18 @@ export default class PlayerScreen extends Component<Props> {
     onPressPlayButton = () => {
 
         if (this.state.playButton === "play-circle-outline") {
+            soundAction('play');
             this.setState({
                 playButton: "pause"
             })
         }
-        else
+        else {
+            soundAction('pause');
             this.setState({
                 playButton: "play-circle-outline"
             })
-        console.log(this.state.playButton)
+        }
+        // console.log(this.state.playButton)     
     }
 
     render() {
@@ -94,56 +129,16 @@ export default class PlayerScreen extends Component<Props> {
                     }}
                 >
                     {/* Header */}
-                    <View style={styles.headerContainer}>
-                        <TouchableOpacity onPress={this.onPress} >
-                            <Icon name="reply" size={30} iconStyle={styles.button} />
-                        </TouchableOpacity>
-
-                        <TouchableOpacity >
-                            <Icon name="list" size={30} iconStyle={styles.button} />
-                        </TouchableOpacity>
-                    </View>
+                    <Header />
 
                     {/* Album art */}
-                    <View style={styles.bodyContainer}>
-                        <View style={styles.albumContainer}>
-                            <TouchableOpacity
-                                style={{
-                                    borderWidth: 0.5,
-                                    borderColor: 'rgba(0,0,0,0.2)',
-                                    justifyContent: 'center',
-                                    width: 230,
-                                    height: 230,
-                                    backgroundColor: '#fff',
-                                    borderRadius: 230,
-                                }}>
-                                <Animated.Image style={{ flex: 1, height: 230, width: 230, borderRadius: 115, transform: [{ rotate: spin }] }} source={require('../asset/album.jpg')} />
-                            </TouchableOpacity>
-                        </View>
-                        <View style={styles.albumInfoContainer}>
-                            <Text style={styles.albumName}>寂しくて眠れない夜は</Text>
-                            <Text style={styles.artistName}>Aimer</Text>
-                        </View>
-                    </View>
+                    <AlbumArt />
 
                     {/* Player */}
-                    <View style={styles.playerContainer}>
-                        <View style={styles.progressBarContainer}>
-                            <Text style={{ color: '#fff' }}>0:00</Text>
-                            <View style={{ margin: 6 }}>
-                                <Bar progress={0.8} width={270} height={3} color={'#fff'} />
-                            </View>
-                            <Text style={{ color: '#fff' }}>0:00</Text>
-                        </View>
-                        <View style={styles.playerBoard}>
-                            <Icon name="shuffle" size={30} iconStyle={styles.itemBoard} />
-                            <Icon name="skip-previous" size={40} iconStyle={styles.itemBoard} />
-                            <Icon name={this.state.playButton} size={65} iconStyle={styles.itemBoard} onPress={this.onPressPlayButton} />
-                            {/* <Icon name={this.state.playButton} size={65} iconStyle={styles.itemBoard} onPress={this.onPressPlayButton} /> */}
-                            <Icon name="skip-next" size={40} iconStyle={styles.itemBoard} />
-                            <Icon name="repeat" size={30} iconStyle={styles.itemBoard} />
-                        </View>
-                    </View>
+                    <Player
+                        playButton={this.state.playButton} 
+                        onPressPlayButton={this.onPressPlayButton}
+                    />
                 </View>
             </View>
         );
@@ -158,56 +153,4 @@ const styles = StyleSheet.create({
         position: "absolute",
         top: 0, left: 0, bottom: 0, right: 0,
     },
-    headerContainer: {
-        flex: 1,
-        paddingTop: 35,
-        paddingLeft: 20,
-        paddingRight: 20,
-        flexDirection: 'row',
-        justifyContent: 'space-between'
-    },
-    button: {
-        color: '#fff'
-    },
-    bodyContainer: {
-        flex: 7,
-    },
-    albumContainer: {
-        flex: 2,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    albumInfoContainer: {
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center'
-    },
-    albumName: {
-        fontSize: 25,
-        paddingBottom: 10,
-        color: '#fff'
-    },
-    artistName: {
-        fontSize: 22,
-        color: '#fff'
-    },
-    playerContainer: {
-        flex: 2,
-        backgroundColor: 'rgba(13, 13, 13, 0.3)',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    progressBarContainer: {
-        flexDirection: 'row',
-        // alignItems:
-    },
-    playerBoard: {
-        flexDirection: 'row',
-        marginTop: 25
-    },
-    itemBoard: {
-        paddingRight: 12,
-        paddingLeft: 12,
-        color: '#fff'
-    }
 });
