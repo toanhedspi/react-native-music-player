@@ -47,18 +47,18 @@ function soundAction(state) {
     }
     else if (state === 'play') {
         sound.play(() => {
-                // Success counts as getting to the end
-                // setTestState(testInfo, component, 'win');
-                // Release when it's done so we're not using up resources
-                sound.release();
-            });
+            // Success counts as getting to the end
+            // setTestState(testInfo, component, 'win');
+            // Release when it's done so we're not using up resources
+            sound.release();
+        });
     }
     else if (state === 'pause') {
         sound.pause();
-        console.log(sound.getDuration());
+        console.log(sound._loaded);
     }
     else if (state === 'duration') {
-        sound.getDuration();
+        return sound.getDuration();
     }
 }
 
@@ -136,8 +136,7 @@ export default class PlayerScreen extends Component<Props> {
 
                     {/* Player */}
                     <Player
-                        playButton={this.state.playButton} 
-                        onPressPlayButton={this.onPressPlayButton}
+                        playButton={this.state.playButton}
                     />
                 </View>
             </View>

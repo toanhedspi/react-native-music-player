@@ -24,7 +24,7 @@ const AlbumArt = () => (
         <View style={styles.albumContainer}>
             <TouchableOpacity
                 style={{
-                    borderWidth: 0.5,
+                    // borderWidth: 0.5,
                     borderColor: 'rgba(0,0,0,0.2)',
                     justifyContent: 'center',
                     width: 230,
@@ -32,7 +32,7 @@ const AlbumArt = () => (
                     backgroundColor: '#fff',
                     borderRadius: 230,
                 }}>
-                <Animated.Image style={{ flex: 1, height: 230, width: 230, borderRadius: 115, transform: [{ rotate: spin }] }} source={require('../asset/album.jpg')} />
+                <Animated.Image style={{ flex: 1, height: 231, width: 231, borderRadius: 115, transform: [{ rotate: spin }] }} source={require('../asset/album.jpg')} />
             </TouchableOpacity>
         </View>
         <View style={styles.albumInfoContainer}>
