@@ -11,15 +11,19 @@ const sound = new Sound(url, (error) => {
         return;
     }
 })
+see = 0;
 count = 0;
+check = true;
 class Player extends Component {
     constructor(props) {
         super(props);
         this.state = {
             playButton: "play-circle-outline",
+            repeatButton: "repeat",
             currentTimeInSec: 0,
             currentTime: '0:00',
             duration: '0:00',
+            currentTimeN: 0,
             progress: 0,
             isLoaded: false,
             isLoop: false,
@@ -27,53 +31,72 @@ class Player extends Component {
         };
     }
 
+    play = () => {
+        this.tickInterval = setInterval(() => { this.tick(); }, 250);
+        sound.play((success) => {
+            if (success) {
+                if (this.tickInterval) {
+                    clearInterval(this.tickInterval);
+                    this.tickInterval = null;
+                }
+            }
+            else {
+                if (this.tickInterval) {
+                    clearInterval(this.tickInterval);
+                    this.tickInterval = null;
+                }
+                console.log('error');
+            }
+        });
+    }
+
+    tick() {
+        sound.getCurrentTime((seconds) => {
+            if (this.tickInterval) {
+                this.setState({
+                    currentTimeN: seconds,
+                });
+            }
+        });
+    }
+
     onPressPlayPauseButton = () => {
         this.state.playButton === "play-circle-outline" ? this.onPressPlayButton() : this.onPressPauseButton();
     }
 
     onPressPlayButton = () => {
-        sound.play((success) => {
-            if (success) {
-                console.log('successfully finished playing');
-            } else {
-                console.log('playback failed due to audio decoding errors');
+        this.play();
+        // sound.play((success) => {
+        //     if (success) {
+        //         console.log('successfully finished playing');
+        //     } else {
+        //         console.log('playback failed due to audio decoding errors');
 
-                // reset the player to its uninitialized state (android only)
-                // this is the only option to recover after an error occured and use the player again
-                whoosh.reset();
-            }
-        });
+        //         // reset the player to its uninitialized state (android only)
+        //         // this is the only option to recover after an error occured and use the player again
+        //         whoosh.reset();
+        //     }
+        // });
 
         min = Math.round(sound.getDuration() / 60);
         sec = Math.round(Math.abs(min * 60 - sound.getDuration()));
         duration = min.toString() + ':' + sec.toString();
-        this.setState({ playButton: 'pause', duration: duration, isLoaded: true, isPause: false });
-    }
-    onPressPauseButton = () => {
-        sound.pause();
-        this.setState({ playButton: "play-circle-outline", isLoaded: false, isPause: true })
-    }
 
-    onPressRepeatButton = () => {
-        sound.setNumberOfLoops(-1);
-        this.setState({ isLoop: true })
-        alert("repeat ok");
-    }
-    render() {
-        if (this.state.isLoaded == true) {
-            console.log(++count);
-            setTimeout((function () {
+        this.setState({ playButton: 'pause', duration: duration, isLoaded: true, isPause: false });
+        if (check) {
+            check = false;
+            setInterval((function () {
                 // if (this.state.isLoop) {
 
                 // }
                 //time = 1000 * sound.getDuration() / Math.floor(sound.getDuration());
                 if (!sound.isPlaying() && !this.state.isPause) {
-                    console.log(sound.isLoaded()); 
+                    console.log("Hello");
                     sound.stop();
                     this.setState({
                         progress: 0,
                         currentTime: '0:00',
-                        currentTimeInSec: 0,
+                        currentTimeN: 0,
                         progress: 0,
                         isLoaded: false,
                         playButton: "play-circle-outline"
@@ -82,24 +105,46 @@ class Player extends Component {
 
                 if (this.state.isLoaded) {
                     // console.log(typeof sound.getCurrentTime())
-                    min = Math.floor(this.state.currentTimeInSec / 60);
-                    sec = this.state.currentTimeInSec - 60 * min;
+                    min = Math.floor(Math.round(this.state.currentTimeN) / 60);
+                    sec = Math.round(this.state.currentTimeN) - 60 * min;
                     console.log(min + ', ' + sec);
-                    
+
                     //console.log(sound.getDuration());
                     if (sec < 10)
                         sec = '0' + sec.toString();
                     current = min + ':' + sec;
                     this.setState({
-                        progress: this.state.progress + 1 / sound.getDuration(),
+                        progress: this.state.currentTimeN / sound.getDuration(),
                         currentTimeInSec: this.state.currentTimeInSec + 1,
                         currentTime: current
                     });
                 }
-            }).bind(this), 1000 * sound.getDuration() / Math.floor(sound.getDuration()));
+            }).bind(this), 1000);
         }
+    }
+    onPressPauseButton = () => {
+        sound.pause();
+        this.setState({ playButton: "play-circle-outline", isLoaded: false, isPause: true })
+    }
+
+    onPressRepeatButton = () => {
+        this.state.repeatButton === "repeat" ? this.onPressRepeatIconButton() : this.onPressRepeatOnceButton();
+    }
+
+    onPressRepeatIconButton = () => {
+        sound.setNumberOfLoops(-1);
+        this.setState({ isLoop: true, repeatButton: "repeat-one" })  
+    }
+
+    onPressRepeatOnceButton = () => {
+        sound.setNumberOfLoops(0);
+        this.setState({ isLoop: false, repeatButton: "repeat" })
+    }
+
+    render() {
+        
         return (
-            <View style={styles.playerContainer}>
+            <View style={styles.playerContainer} >
                 <View style={styles.progressBarContainer}>
                     <Text style={{ color: '#fff' }}>{this.state.currentTime}</Text>
                     <View style={{ margin: 6 }}>
@@ -112,7 +157,7 @@ class Player extends Component {
                     <Icon name="skip-previous" size={40} iconStyle={styles.itemBoard} />
                     <Icon name={this.state.playButton} size={65} iconStyle={styles.itemBoard} onPress={this.onPressPlayPauseButton} />
                     <Icon name="skip-next" size={40} iconStyle={styles.itemBoard} />
-                    <Icon name="repeat" size={30} iconStyle={styles.itemBoard} onPress={this.onPressRepeatButton} />
+                    <Icon name={this.state.repeatButton} size={30} iconStyle={styles.itemBoard} onPress={this.onPressRepeatButton} />
                 </View>
             </View>
         )
