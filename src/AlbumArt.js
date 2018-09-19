@@ -19,28 +19,36 @@ const spin = this.spinValue.interpolate({
     outputRange: ['0deg', '360deg']
 })
 
-const AlbumArt = () => (
-    <View style={styles.bodyContainer}>
-        <View style={styles.albumContainer}>
-            <TouchableOpacity
-                style={{
-                    // borderWidth: 0.5,
-                    borderColor: 'rgba(0,0,0,0.2)',
-                    justifyContent: 'center',
-                    width: 230,
-                    height: 230,
-                    backgroundColor: '#fff',
-                    borderRadius: 230,
-                }}>
-                <Animated.Image style={{ flex: 1, height: 231, width: 231, borderRadius: 115, transform: [{ rotate: spin }] }} source={require('../asset/album.jpg')} />
-            </TouchableOpacity>
-        </View>
-        <View style={styles.albumInfoContainer}>
-            <Text style={styles.albumName}>寂しくて眠れない夜は</Text>
-            <Text style={styles.artistName}>Aimer</Text>
-        </View>
-    </View>
-)
+class AlbumArt extends Component {
+    constructor(props) {
+        super(props);
+    }
+
+    render() {
+        return (
+            <View style={styles.bodyContainer}>
+                <View style={styles.albumContainer}>
+                    <TouchableOpacity
+                        style={{
+                            // borderWidth: 0.5,
+                            borderColor: 'rgba(0,0,0,0.2)',
+                            justifyContent: 'center',
+                            width: 230,
+                            height: 230,
+                            backgroundColor: '#fff',
+                            borderRadius: 230,
+                        }}>
+                        <Animated.Image style={{ flex: 1, height: 231, width: 231, borderRadius: 115, transform: [{ rotate: spin }] }} source={{uri: this.props.url}} />
+                    </TouchableOpacity>
+                </View>
+                <View style={styles.albumInfoContainer}>
+                    <Text style={styles.albumName}>{this.props.title}</Text>
+
+                </View>
+            </View>
+        )
+    }
+}
 
 export default AlbumArt;
 

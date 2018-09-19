@@ -72,6 +72,10 @@ export default class PlayerScreen extends Component<Props> {
         // this.onPressButton = this.onPressButton.bind(this);
     }
 
+    static navigationOptions = {
+        header: null,
+    };
+
     onPressButton = () => {
         console.log(224);
     }
@@ -93,8 +97,12 @@ export default class PlayerScreen extends Component<Props> {
     }
 
     render() {
-
+        const { navigation } = this.props;
+        const itemTitle = navigation.getParam('title', 'NO-ITEM');
+        const itemId = navigation.getParam('id', 'NO-ITEM');
+        const itemUrl = navigation.getParam('url', 'NO-ITEM');
         const resizeMode = 'cover';
+
         return (
             <View style={styles.container}>
                 <View
@@ -111,7 +119,7 @@ export default class PlayerScreen extends Component<Props> {
                             resizeMode,
                             width: 400,
                         }}
-                        source={require('../asset/album.jpg')}
+                        source={{uri: itemUrl}}
                     />
                     <BlurView
                         style={styles.absolute}
@@ -129,14 +137,17 @@ export default class PlayerScreen extends Component<Props> {
                     }}
                 >
                     {/* Header */}
-                    <Header />
+                    <Header 
+                        navigate={this.props.navigation.navigate}
+                    />
 
                     {/* Album art */}
-                    <AlbumArt />
+                    <AlbumArt title={itemTitle} url={itemUrl}/>
 
                     {/* Player */}
                     <Player
                         playButton={this.state.playButton}
+                        id={itemId}
                     />
                 </View>
             </View>

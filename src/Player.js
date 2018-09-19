@@ -4,20 +4,13 @@ import { Icon } from 'react-native-elements'
 import { Bar } from 'react-native-progress';
 import Sound from 'react-native-sound';
 
-const url = require('../Kataomoi.mp3');
-const sound = new Sound(url, (error) => {
-    if (error) {
-        console.log('failed to load the sound', error);
-        return;
-    }
-})
-see = 0;
-count = 0;
 check = true;
+
 class Player extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            url: {},
             playButton: "play-circle-outline",
             repeatButton: "repeat",
             currentTimeInSec: 0,
@@ -31,8 +24,43 @@ class Player extends Component {
         };
     }
 
+    componentDidMount() {
+        this.getSoundUrl(this.props.id);
+        // console.log(this.state.url)
+
+    }
+
+    getSoundUrl = (id) => {
+        let client_id = 'a7Ucuq0KY8Ksn8WzBG6wj4x6pcId6BpU';
+
+        return fetch("https://api.soundcloud.com/tracks/" + id + "/streams" + "?client_id=" + client_id)
+            .then((response) => response.json())
+            .then((responseJson) => {
+                console.log(responseJson);
+
+                this.setState({
+                    url: responseJson,
+                }, function () {
+
+                });
+                console.log(responseJson.http_mp3_128_url);
+                sound = new Sound(responseJson.http_mp3_128_url, '', (error) => {
+                    if (error) {
+                        console.log('failed to load the sound', error);
+                        return;
+                    }
+                });
+
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+    }
+
     play = () => {
         this.tickInterval = setInterval(() => { this.tick(); }, 250);
+        // console.log( sound);
+
         sound.play((success) => {
             if (success) {
                 if (this.tickInterval) {
@@ -61,6 +89,7 @@ class Player extends Component {
     }
 
     onPressPlayPauseButton = () => {
+
         this.state.playButton === "play-circle-outline" ? this.onPressPlayButton() : this.onPressPauseButton();
     }
 
@@ -78,9 +107,9 @@ class Player extends Component {
         //     }
         // });
 
-        min = Math.round(sound.getDuration() / 60);
-        sec = Math.round(Math.abs(min * 60 - sound.getDuration()));
-        duration = min.toString() + ':' + sec.toString();
+        let min = Math.round(sound.getDuration() / 60);
+        let sec = Math.round(Math.abs(min * 60 - sound.getDuration()));
+        let duration = min.toString() + ':' + sec.toString();
 
         this.setState({ playButton: 'pause', duration: duration, isLoaded: true, isPause: false });
         if (check) {
@@ -91,7 +120,6 @@ class Player extends Component {
                 // }
                 //time = 1000 * sound.getDuration() / Math.floor(sound.getDuration());
                 if (!sound.isPlaying() && !this.state.isPause) {
-                    console.log("Hello");
                     sound.stop();
                     this.setState({
                         progress: 0,
@@ -104,7 +132,7 @@ class Player extends Component {
                 }
 
                 if (this.state.isLoaded) {
-                    // console.log(typeof sound.getCurrentTime())
+                    console.log(min);
                     min = Math.floor(Math.round(this.state.currentTimeN) / 60);
                     sec = Math.round(this.state.currentTimeN) - 60 * min;
                     console.log(min + ', ' + sec);
@@ -112,7 +140,7 @@ class Player extends Component {
                     //console.log(sound.getDuration());
                     if (sec < 10)
                         sec = '0' + sec.toString();
-                    current = min + ':' + sec;
+                    let current = min + ':' + sec;
                     this.setState({
                         progress: this.state.currentTimeN / sound.getDuration(),
                         currentTimeInSec: this.state.currentTimeInSec + 1,
@@ -133,7 +161,7 @@ class Player extends Component {
 
     onPressRepeatIconButton = () => {
         sound.setNumberOfLoops(-1);
-        this.setState({ isLoop: true, repeatButton: "repeat-one" })  
+        this.setState({ isLoop: true, repeatButton: "repeat-one" })
     }
 
     onPressRepeatOnceButton = () => {
@@ -142,7 +170,7 @@ class Player extends Component {
     }
 
     render() {
-        
+
         return (
             <View style={styles.playerContainer} >
                 <View style={styles.progressBarContainer}>
@@ -187,3 +215,5 @@ const styles = StyleSheet.create({
         color: '#fff'
     }
 })
+
+console.log(typeof sound2);
